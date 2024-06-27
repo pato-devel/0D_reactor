@@ -1,0 +1,3 @@
+from OxidationModel.oxidationRateModel.BrunoOxidationModel import BrunoOxidationModel
+from OxidationModel.oxidationRateModel.PrataOxidationModel import  PrataOxidationModel
+from OxidationModel.oxidationRateModel.ZAOxidationModel import ZAOxidationModel
