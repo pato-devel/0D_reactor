@@ -15,43 +15,56 @@ import sys
 
 class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
+    # constant values
+    T_beam = 1000 # beam temperature [K]
+    p_beam = 2.4e-2 # beam pressure [Pa]
+    B = 1e-5 # total active site density [mol/m2]
+    Mm_O = 0.0159994 # molar mass of oxygen [kg/mol]
+    Av =  6.022e23 # Avogadro number [1/mol]
+    m_O = Mm_O / Av # mass of oxygen atom [kg]
+    k_B = 1.380649e-23 # Boltzmann constant [J/K]
+    h = 6.62607015e-34 # Planck constant [J.s]
+    R = 8.3144598 # Universal gas constant [J/mol/K]
+    
     def __init__(self):
-        print("Inside PrataOxidationModel class")
+        print("Initialize PrataOxidationModel class")
         self.solve_ODEs()
         return
 
     def compute_rates(self, Tw):
+        """
+        compute the reaction rates
+
+        :param Tw: surface temperature [K]
+        :return: w_O oxygen concentration [mol/m3], k reaction rates [mol/m2/s]
+        """ 
         # constant variables
-        T_beam = 1000 # beam temperature [K]
-        p_beam = 2.4e-2 # beam pressure [Pa]
-        self.B = 1e-5 # total active site density [mol/m2]
-        Mm_O = 0.0159994 # molar mass of oxygen [kg/mol]
-        Av =  6.022e23 # Avogadro number [1/mol]
-        m_O = Mm_O / Av # mass of oxygen atom [kg]
-        k_B = 1.380649e-23 # Boltzmann constant [J/K]
-        h = 6.62607015e-34 # Planck constant [J.s]
-        R = 8.3144598 # Universal gas constant [J/mol/K]
-        F_O = 1/4 * math.sqrt(8 * k_B * T_beam / (math.pi * m_O)) # flux of gas species to the surface = F_O [O] [mol/m2/s] 
-        F_O_2D = math.sqrt(math.pi * k_B *  Tw / (2 * m_O)) # mean thermal speed of the mobile adsobed species on the surface [m/s] 
-        w_O = p_beam / R * T_beam # oxygen concentration [mol/m3]
+        F_O = 1/4 * math.sqrt(8 * self.k_B * self.T_beam / (math.pi * self.m_O)) # flux of gas species to the surface = F_O [O] [mol/m2/s] 
+        F_O_2D = math.sqrt(math.pi * self.k_B *  Tw / (2 * self.m_O)) # mean thermal speed of the mobile adsobed species on the surface [m/s] 
+        w_O = self.p_beam / self.R * self.T_beam # oxygen concentration [mol/m3]
 
         # reaction rates
         k={}
         k["kO1"] = F_O * 0.3 / self.B
-        k["kO2"] = 2 * math.pi * m_O * k_B**2 * Tw**2 / (Av * self.B * h**3) * math.exp(-44277 /  Tw)
+        k["kO2"] = 2 * math.pi * self.m_O * self.k_B**2 * Tw**2 / (self.Av * self.B * self.h**3) * math.exp(-44277 /  Tw)
         k["kO3"] = F_O / self.B * 100 * math.exp(-4000 /  Tw)
         k["kO4"] = F_O / self.B * math.exp(-500 /  Tw)
         k["kO5"] = F_O / self.B * 0.7
-        k["kO6"] = 2 * math.pi * m_O * k_B**2 *  Tw**2 / (Av * self.B * h**3) * math.exp(-96500 /  Tw)
+        k["kO6"] = 2 * math.pi * self.m_O * self.k_B**2 *  Tw**2 / (self.Av * self.B * self.h**3) * math.exp(-96500 /  Tw)
         k["kO7"] = F_O / self.B * 1000 * math.exp(-4000 /  Tw)
-        k["kO8"] = math.sqrt(Av / self.B) * F_O_2D * 1e-3 * math.exp(-15000/ Tw)
-        k["kO9"] = math.sqrt(Av / self.B) * F_O_2D * 5e-5 * math.exp(-15000/ Tw)
+        k["kO8"] = math.sqrt(self.Av / self.B) * F_O_2D * 1e-3 * math.exp(-15000/ Tw)
+        k["kO9"] = math.sqrt(self.Av / self.B) * F_O_2D * 5e-5 * math.exp(-15000/ Tw)
 
         return w_O, k
 
-        
-    # steady-state surface concentrations
     def surface_reaction_rates(self, w_O, k):
+        """
+        compute the steady-state surface concentrations
+
+        :param w_O: oxygen concentration [mol/m3]
+        :param k: reaction rates [mol/m2/s]
+        :return: steady-state surface density of w_s empty sites [mol/m2], w_Os absorbed oxygen with weakly bound [mol/m2], and w_Oss absorbed oxygen with relatively strong bound [mol/m2]
+        """ 
         A1 = 0
         B1 = k["kO1"] * w_O
         C1 = 2 * k["kO9"]
