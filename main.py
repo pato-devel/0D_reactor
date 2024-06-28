@@ -1,3 +1,10 @@
+"""
+File: main.py
+Authors: Bruno Dias and Jeremie Meurisse
+Date: 06/27/24
+Description: main script to run the 0D reactor with different reaction rates.
+"""
+
 # This is a sample Python script.
 import mutationpp
 # Press ⌃R to execute it or replace it with your code.
