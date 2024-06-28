@@ -151,7 +151,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         w_s, w_Os, w_Oss = self.surface_coverage(k)
         # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * self.T_beam)) # not used in dwdt because m_O2 not defined
         f_O2 = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
-        return 2 * f_O2
+        return f_O2
     
     def fun_f_CO2(self, Tw, t):
         """
