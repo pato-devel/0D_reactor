@@ -185,7 +185,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         """
         plot the model prediction for O-atom
         """ 
-        Tw = np.linspace(800,2000,100)
+        Tw = np.linspace(800,2400,100)
         p_CO = []
         p_O = []
         p_O2 = []
@@ -201,7 +201,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.plot(Tw, np.array(p_O2), 'g', label='O2')
         plt.plot(Tw, np.array(p_O), 'b', label='O')
         plt.legend(loc='best')
-        plt.xlabel('t')
+        plt.xlabel('T [K]')
         plt.grid()
         plt.show()     
 
@@ -225,7 +225,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.plot(Tw, np.array(w_s)/self.B, 'k', label='w_s')
         plt.plot(Tw, (np.array(w_Os)+np.array(w_Oss))/self.B, 'g', label='w_Os+w_Oss')
         plt.legend(loc='best')
-        plt.xlabel('t')
+        plt.xlabel('T [K]')
         plt.grid()
         plt.yscale("log")
         plt.show()
