@@ -40,8 +40,8 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         """ 
         # constant variables
         F_O = 1/4 * math.sqrt(8 * self.k_B * self.T_beam / (math.pi * self.m_O)) # flux of gas species to the surface = F_O [O] [mol/m2/s] 
-        F_O_2D = math.sqrt(math.pi * self.k_B *  Tw / (2 * self.m_O)) # mean thermal speed of the mobile adsobed species on the surface [m/s] 
-        w_O = self.p_beam / self.R * self.T_beam # oxygen concentration [mol/m3]
+        F_O_2D = math.sqrt(math.pi * self.k_B *  Tw / (2 * self.m_O)) # mean thermal speed of the mobile adsorbed species on the surface [m/s] 
+        w_O = self.p_beam / (self.R * self.T_beam) # oxygen concentration [mol/m3]
 
         # reaction rates
         k={}
@@ -123,7 +123,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.plot(Tw, np.array(w_s)/self.B, 'k', label='w_s')
         plt.plot(Tw, (np.array(w_Os)+np.array(w_Oss))/self.B, 'g', label='w_Os')
 
-        plt.ylim(1e-4,1)
+        # plt.ylim(1e-4,1)
         plt.legend(loc='best')
         plt.xlabel('t')
         plt.grid()
