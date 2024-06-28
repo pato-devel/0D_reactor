@@ -105,7 +105,106 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         w_Oss = 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
 
         return w_s, w_Os, w_Oss
+
+    def fun_f_CO(self, Tw, t):
+        """
+        compute the probability of CO product
+
+        :param Tw: surface temperature [K]
+        :return: p_CO, probability of CO product = d[CO]/dt reaction rate [mol/m2/s] divided by O-atom flux [mol/m2/s]
+        """
+        F_O, w_O, k = self.compute_rates(Tw)
+        w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
+        dwdt = k["kO3"] * w_O * w_Os + k["kO7"] * w_O * w_Oss
+        f_Oin = F_O * w_O
+        return dwdt/f_Oin
     
+    def fun_f_O(self, Tw, t):
+        """
+        compute the probability of O product
+
+        :param Tw: surface temperature [K]
+        :return: p_O, probability of O product = d[O]/dt reaction rate [mol/m2/s] divided by O-atom flux [mol/m2/s]
+        """ 
+        press_O = self.p_beam # O-atom pressure [Pa] assume x_O = 1
+        F_O, w_O, k = self.compute_rates(Tw)
+        w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
+        dwdt = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * Tw)) - k["kO1"] * w_O * w_s + k["kO2"] * w_Os - k["kO4"] * w_O * w_Os - k["kO5"] * w_O * w_s + k["kO6"] * w_Oss + 0
+        f_Oin = F_O * w_O
+        return dwdt/f_Oin
+    
+    def fun_f_O2(self, Tw, t):
+        """
+        compute the probability of O2 product
+
+        :param Tw: surface temperature [K]
+        :return: p_O2, probability of O2 product = d[O2]/dt reaction rate [mol/m2/s] divided by O-atom flux [mol/m2/s]
+        """ 
+        press_O2 = 0 # O2 pressure [Pa] assume x_O2 = 0
+        F_O, w_O, k = self.compute_rates(Tw)
+        w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
+        # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * Tw))
+        dwdt = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
+        f_Oin = F_O * w_O
+        return dwdt/f_Oin
+    
+    def fun_f_CO2(self, Tw, t):
+        """
+        compute the probability of CO2 product
+
+        :param Tw: surface temperature [K]
+        :return: p_CO2, probability of O2 product = d[CO2]/dt reaction rate [mol/m2/s] divided by O-atom flux [mol/m2/s]
+        """ 
+        F_O, w_O, k = self.compute_rates(Tw)
+        w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
+        dwdt = k["kO4"] * w_O * w_Os 
+        f_Oin = F_O * w_O
+        return dwdt/f_Oin
+    
+    def solve_ODEs(self, Tw):
+        """
+        solve ODEs for probability of products
+
+        :param Tw: surface temperature [K]
+        :return: [p_CO, p_O]: probability of products after one time step of 1 sec [-]
+        """ 
+        T0 = Tw
+        t_span = (0,1)
+        t_eval = np.linspace(t_span[0], t_span[1],2)
+        sol_CO = odeint(self.fun_f_CO, T0, t_eval)
+        p_CO=sol_CO[1]-sol_CO[0]
+        sol_O = odeint(self.fun_f_O, T0, t_eval)
+        p_O=sol_O[1]-sol_O[0]
+        sol_O2 = odeint(self.fun_f_O2, T0, t_eval)
+        p_O2=sol_O2[1]-sol_O2[0]
+        sol_CO2 = odeint(self.fun_f_CO2, T0, t_eval)
+        p_CO2=sol_CO2[1]-sol_CO2[0]
+        return p_CO, p_O, p_O2, p_CO2
+    
+    def plot_model_prediction(self):
+        """
+        plot the model prediction for O-atom
+        """ 
+        Tw = np.linspace(800,2000,100)
+        p_CO = []
+        p_O = []
+        p_O2 = []
+        p_CO2 = []
+        for Tw_i in Tw:
+            p_CO_i, p_O_i, p_O2_i, p_CO2_i  = self.solve_ODEs(Tw_i)
+            p_CO.append(p_CO_i)
+            p_O.append(p_O_i)
+            p_O2.append(p_O2_i)
+            p_CO2.append(p_CO2_i)
+        plt.plot(Tw, np.array(p_CO), 'k', label='CO')
+        plt.plot(Tw, np.array(p_CO2), 'r', label='CO2')
+        plt.plot(Tw, np.array(p_O2), 'g', label='O2')
+        plt.plot(Tw, np.array(p_O), 'b', label='O')
+        plt.legend(loc='best')
+        plt.xlabel('t')
+        plt.grid()
+        plt.show()     
+
     def plot_surface_coverage(self):
         """
         plot the surface coverage for O-atom
@@ -130,50 +229,6 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.grid()
         plt.yscale("log")
         plt.show()
-
-    def fun_f_CO(self, Tw, t):
-        """
-        compute the probability of CO product
-
-        :param Tw: surface temperature [K]
-        :return: p_CO, probability of CO product = d[CO]/dt reaction rate [mol/m2/s] divided by O-atom flux [mol/m2/s]
-        """ 
-        F_O, w_O, k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
-        dwdt = k["kO3"] * w_O * w_Os + k["kO7"] * w_O * w_Oss
-        f_Oin = F_O * w_O
-        return dwdt/f_Oin
-    
-    def solve_ODEs(self, Tw):
-        """
-        solve ODEs for probability of CO product
-
-        :param Tw: surface temperature [K]
-        :return: p_CO, probability of CO product after one time step of 1 sec
-        """ 
-        T0 = Tw
-        t_span = (0,1)
-        t_eval = np.linspace(t_span[0], t_span[1],2)
-        sol = odeint(self.fun_f_CO, T0, t_eval)
-        p_CO=sol[1]-sol[0]
-        return p_CO
-    
-    def plot_model_prediction(self):
-        """
-        plot the model prediction for O-atom
-        """ 
-        Tw = np.linspace(800,2000,100)
-        p_CO = []
-        for Tw_i in Tw:
-            p_CO.append(self.solve_ODEs(Tw_i))
-        plt.plot(Tw, np.array(p_CO), 'k', label='CO')
-        plt.legend(loc='best')
-        plt.xlabel('t')
-        plt.grid()
-        plt.yscale("log")
-        plt.show()     
-
-
 
 
 
