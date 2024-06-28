@@ -17,8 +17,8 @@ import sys
 class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
     """Oxidation class using Prata model
 
-    Compute the reaction rates.
-    [...]
+    Compute and plot the propability of products for O-atom
+    Plot surface coverage for O-atom
 
     Attributes:
         None
@@ -129,7 +129,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         press_O = self.p_beam # O-atom pressure [Pa] assume x_O = 1
         F_O, w_O, k = self.compute_rates(Tw)
         w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
-        dwdt = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * Tw)) - k["kO1"] * w_O * w_s + k["kO2"] * w_Os - k["kO4"] * w_O * w_Os - k["kO5"] * w_O * w_s + k["kO6"] * w_Oss + 0
+        dwdt = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * self.T_beam)) - k["kO1"] * w_O * w_s + k["kO2"] * w_Os - k["kO4"] * w_O * w_Os - k["kO5"] * w_O * w_s + k["kO6"] * w_Oss + 0
         f_Oin = F_O * w_O
         return dwdt/f_Oin
     
@@ -143,7 +143,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         press_O2 = 0 # O2 pressure [Pa] assume x_O2 = 0
         F_O, w_O, k = self.compute_rates(Tw)
         w_s, w_Os, w_Oss = self.surface_reaction_rates(w_O, k)
-        # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * Tw))
+        # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * self.T_beam)) # not used in dwdt because m_O2 not defined
         dwdt = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
         f_Oin = F_O * w_O
         return dwdt/f_Oin
