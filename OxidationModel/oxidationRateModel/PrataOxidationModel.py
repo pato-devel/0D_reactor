@@ -54,17 +54,17 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :return: w_O oxygen concentration [mol/m3], k reaction rates [mol/m2/s]
         """ 
         # thermal dependent variables
-        F_O_2D = math.sqrt(math.pi * self.k_B *  Tw / (2 * self.m_O)) # mean thermal speed of the mobile adsorbed O-atom on the surface [m/s] 
+        F_O_2D = math.sqrt(math.pi * self.k_B * Tw / (2 * self.m_O)) # mean thermal speed of the mobile adsorbed O-atom on the surface [m/s] 
         
         # reaction rates
         k={}
-        k["kO1"] =  self.F_O * 0.3 / self.B
+        k["kO1"] = self.F_O * 0.3 / self.B
         k["kO2"] = 2 * math.pi * self.m_O * self.k_B**2 * Tw**2 / (self.Av * self.B * self.h**3) * math.exp(-44277 /  Tw)
-        k["kO3"] =  self.F_O / self.B * 100 * math.exp(-4000 /  Tw)
-        k["kO4"] =  self.F_O / self.B * math.exp(-500 /  Tw)
-        k["kO5"] =  self.F_O / self.B * 0.7
+        k["kO3"] = self.F_O / self.B * 100 * math.exp(-4000 /  Tw)
+        k["kO4"] = self.F_O / self.B * math.exp(-500 /  Tw)
+        k["kO5"] = self.F_O / self.B * 0.7
         k["kO6"] = 2 * math.pi * self.m_O * self.k_B**2 *  Tw**2 / (self.Av * self.B * self.h**3) * math.exp(-96500 /  Tw)
-        k["kO7"] =  self.F_O / self.B * 1000 * math.exp(-4000 /  Tw)
+        k["kO7"] = self.F_O / self.B * 1000 * math.exp(-4000 /  Tw)
         k["kO8"] = math.sqrt(self.Av / self.B) * F_O_2D * 1e-3 * math.exp(-15000/ Tw)
         k["kO9"] = math.sqrt(self.Av / self.B) * F_O_2D * 5e-5 * math.exp(-15000/ Tw)
 
@@ -172,7 +172,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param Tw: surface temperature [K]
         :return: [p_CO, p_O]: probability of products after one time step of 1 sec [-]
         """ 
-        # reaction rates
+        # flux of products
         t_span = (0,1)
         t_eval = np.linspace(t_span[0], t_span[1],2)
         sol_CO = odeint(self.fun_f_CO, Tw, t_eval)
