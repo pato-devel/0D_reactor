@@ -76,12 +76,12 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
         return k
 
-    def surface_reaction_rates(self, k):
+    def surface_coverage(self, k):
         """
         compute the steady-state surface concentrations
 
         :param k: reaction rates [mol/m2/s]
-        :return: steady-state surface density of w_s empty sites [mol/m2], w_Os absorbed oxygen with weakly bound [mol/m2], and w_Oss absorbed oxygen with relatively strong bound [mol/m2]
+        :return: steady-state surface density of w_s empty sites [mol/m2], of w_Os absorbed oxygen with weakly bound [mol/m2], and of w_Oss absorbed oxygen with relatively strong bound [mol/m2]
         """ 
         A1 = 0 # 2 * k["kox1"] *  self.w_O2
         B1 = k["kO1"] *  self.w_O
@@ -122,7 +122,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :return: f_CO = d[CO]/dt flux of CO product to the surface [mol/m2/s]
         """
         k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_reaction_rates(k)
+        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_CO = k["kO3"] * self.w_O * w_Os + k["kO7"] * self.w_O * w_Oss
         return f_CO
     
@@ -135,7 +135,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         """
         press_O = self.p_beam # O-atom pressure [Pa] assume x_O = 1
         k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_reaction_rates(k)
+        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_O = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * self.T_beam)) - k["kO1"] * self.w_O * w_s + k["kO2"] * w_Os - k["kO4"] * self.w_O * w_Os - k["kO5"] * self.w_O * w_s + k["kO6"] * w_Oss + 0
         return f_O
     
@@ -148,7 +148,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         """
         press_O2 = 0 # O2 pressure [Pa] assume x_O2 = 0
         k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_reaction_rates(k)
+        w_s, w_Os, w_Oss = self.surface_coverage(k)
         # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * self.T_beam)) # not used in dwdt because m_O2 not defined
         f_O2 = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
         return 2 * f_O2
@@ -161,7 +161,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :return: f_CO2 = d[CO2]/dt flux of CO2 product to the surface [mol/m2/s]
         """
         k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_reaction_rates(k)
+        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_CO2 = k["kO4"] * self.w_O * w_Os 
         return f_CO2
     
@@ -184,7 +184,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         sol_CO2 = odeint(self.fun_f_CO2, Tw, t_eval)
         f_CO2=sol_CO2[1]-sol_CO2[0]
 
-        # probability
+        # probabilities
         p_CO = f_CO / self.f_Oin
         p_O = f_O / self.f_Oin
         p_O2 = 2 * f_O2 / self.f_Oin # if x_O2 > 0: (2 * f_CO2 + f_CO) / (2 * self.f_O2in)
@@ -229,7 +229,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         w_Oss = []
         for Tw_i in Tw:
             k = self.compute_rates(Tw_i)
-            w_s_i, w_Os_i, w_Oss_i = self.surface_reaction_rates(k)
+            w_s_i, w_Os_i, w_Oss_i = self.surface_coverage(k)
             w_s.append(w_s_i)
             w_Os.append(w_Os_i)
             w_Oss.append(w_Oss_i)
