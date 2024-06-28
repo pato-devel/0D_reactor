@@ -1,65 +1,123 @@
+"""
+File: main.py
+Authors: Bruno Dias and Jeremie Meurisse
+Date: 06/27/24
+Description: 0D reactor with different reaction rates using Prata model.
+"""
+
 import OxidationModel.oxidationRateModel.OxidationRateModel as Ox
 from OxidationModel.packages import ABC
 import math
 from scipy.integrate import odeint
+from scipy.optimize import fsolve
+import numpy as np
+import sys
 
 class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
-    def __init__(self,Tw=1000):
+    def __init__(self):
         print("Inside PrataOxidationModel class")
-        self.Tw = Tw # surface temperature [K]
+        self.solve_ODEs()
         return
 
-    def compute_rates(self):
+    def compute_rates(self, Tw):
         # constant variables
         T_beam = 1000 # beam temperature [K]
-        B = 1e-5 # total active site density [mol/m2]
+        p_beam = 2.4e-2 # beam pressure [Pa]
+        self.B = 1e-5 # total active site density [mol/m2]
         Mm_O = 0.0159994 # molar mass of oxygen [kg/mol]
         Av =  6.022e23 # Avogadro number [1/mol]
         m_O = Mm_O / Av # mass of oxygen atom [kg]
         k_B = 1.380649e-23 # Boltzmann constant [J/K]
         h = 6.62607015e-34 # Planck constant [J.s]
+        R = 8.3144598 # Universal gas constant [J/mol/K]
         F_O = 1/4 * math.sqrt(8 * k_B * T_beam / (math.pi * m_O)) # flux of gas species to the surface = F_O [O] [mol/m2/s] 
-        F_O_2D = math.sqrt(math.pi * k_B * self.Tw / (2 * m_O)) # mean thermal speed of the mobile adsobed species on the surface [m/s] 
+        F_O_2D = math.sqrt(math.pi * k_B *  Tw / (2 * m_O)) # mean thermal speed of the mobile adsobed species on the surface [m/s] 
+        w_O = p_beam / R * T_beam # oxygen concentration [mol/m3]
 
         # reaction rates
-        self.kO1 = F_O * 0.3 / B
-        self.kO2 = 2 * math.pi * m_O * k_B**2 * self.Tw**2 / (Av * B * h**3) * math.exp(-44277 / self.Tw)
-        self.kO3 = F_O / B * 100 * math.exp(-4000 / self.Tw)
-        self.kO4 = F_O / B * math.exp(-500 / self.Tw)
-        self.k05 = F_O / B * 0.7
-        self.k06 = 2 * math.pi * m_O * k_B**2 * self.Tw**2 / (Av * B * h**3) * math.exp(-96500 / self.Tw)
-        self.k07 = F_O / B * 1000 * math.exp(-4000 / self.Tw)
-        self.k08 = math.sqrt(Av / B) * F_O_2D * 1e-3 * math.exp(-15000/self.Tw)
-        self.k09 = math.sqrt(Av / B) * F_O_2D * 5e-5 * math.exp(-15000/self.Tw)
+        k={}
+        k["kO1"] = F_O * 0.3 / self.B
+        k["kO2"] = 2 * math.pi * m_O * k_B**2 * Tw**2 / (Av * self.B * h**3) * math.exp(-44277 /  Tw)
+        k["kO3"] = F_O / self.B * 100 * math.exp(-4000 /  Tw)
+        k["kO4"] = F_O / self.B * math.exp(-500 /  Tw)
+        k["kO5"] = F_O / self.B * 0.7
+        k["kO6"] = 2 * math.pi * m_O * k_B**2 *  Tw**2 / (Av * self.B * h**3) * math.exp(-96500 /  Tw)
+        k["kO7"] = F_O / self.B * 1000 * math.exp(-4000 /  Tw)
+        k["kO8"] = math.sqrt(Av / self.B) * F_O_2D * 1e-3 * math.exp(-15000/ Tw)
+        k["kO9"] = math.sqrt(Av / self.B) * F_O_2D * 5e-5 * math.exp(-15000/ Tw)
+
+        return w_O, k
 
         
     # steady-state surface concentrations
-    def surface_reaction_rates(self, w):
-        w_O, w_Os, w_Oss, f_CO = w
-        output={}
-        output["A1"] = 0
-        output["B1"] = self.kO1 * w_O
-        output["C1"] = 2 * self.k09
-        output["D1"] = self.kO2 + (self.kO3 + self.kO4) * w_O + 0
-        output["A2"] = 0
-        output["B2"] = self.kO5 * w_O
-        output["C2"] = 2 * self.kO8
-        output["D2"] = self.kO6
+    def surface_reaction_rates(self, w_O, k):
+        A1 = 0
+        B1 = k["kO1"] * w_O
+        C1 = 2 * k["kO9"]
+        D1 = k["kO2"]+ (k["kO3"] + k["kO4"]) * w_O + 0
+        A2 = 0
+        B2 = k["kO5"] * w_O
+        C2 = 2 * k["kO8"]
+        D2 = k["kO6"] + k["kO7"] * w_O + 0
+        A3 = 0
+        B3 = 0
+        C3 = 0
+        D3 = 0
 
+        def func_s(w_s):
+            f = - w_s + self.B\
+                   - 2 * (A1 * w_s**2 + B1 * w_s) / (D1 + math.sqrt(D1**2 + 4 * C1 * (A1 * w_s**2 + B1 * w_s)))\
+                   - 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
+                   #- 2 * (B3 * w_s) / (D3 + math.sqrt(D3**2 + 4 * C3 * B2 * w_s))
+            return f
+        
+        w_s_root = fsolve(func_s, self.B)
+        w_s = w_s_root[0]
+        tol = 1e-12
+        if abs(func_s(w_s)) > tol:
+            print("Error: f > 0, f =",str(w_s_root[1]))
+            sys.exit()
+        w_Os = 2 * (A1 * w_s**2 + B1 * w_s) / (D1 + math.sqrt(D1**2 + 4 * C1 * (A1 * w_s**2 + B1 * w_s)))
+        w_Oss = 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
 
-
-
+        return w_s, w_Os, w_Oss
     
-    def f_CO(self, w, t):
-        w_O, w_Os, w_Oss, f_CO = w
-        dwdt = [f_CO, self.kO3 * w_O * w_Os + self.kO7 * w_O * w_Oss]
-        return dwdt
+    # def f_CO(self, Tw, t):
+    #     w_O, kO1, kO2, kO3, kO4, kO5, kO6, kO7, kO8, kO9 = self.compute_rates(Tw)
+    #     w_Os, w_Oss = self.surface_reaction_rates(w_O)
+    #     dwdt = kO3 * w_O * w_Os + kO7 * w_O * w_Oss
+    #     return dwdt
     
     def solve_ODEs(self):
-        w0 = [1, 0, 0, 0]
-        sol = odeint(f_CO, y0, t, args=(b, c))
-        
+        # w0 = [1, 0] # Oxygen concentration [mol/m3]
+        # t = np.linspace(0, 1, int(1e6))
+        # sol = odeint(self.f_CO, w_O_0, t, args=())
+        Tw = np.linspace(800,2000,100)
+        w_s = []
+        w_Os = []
+        w_Oss = []
+        for Tw_i in Tw:
+            w_O, k = self.compute_rates(Tw_i)
+            w_s_i, w_Os_i, w_Oss_i = self.surface_reaction_rates(w_O, k)
+            w_s.append(w_s_i)
+            w_Os.append(w_Os_i)
+            w_Oss.append(w_Oss_i)
+        import matplotlib.pyplot as plt
+
+        plt.plot(Tw, np.array(w_Os)/self.B, 'r', label='w_Os')
+        plt.plot(Tw, np.array(w_Oss)/self.B, 'b', label='w_Oss')
+        plt.plot(Tw, np.array(w_s)/self.B, 'k', label='w_s')
+        plt.plot(Tw, (np.array(w_Os)+np.array(w_Oss))/self.B, 'g', label='w_Os')
+
+        plt.ylim(1e-4,1)
+        plt.legend(loc='best')
+        plt.xlabel('t')
+        plt.grid()
+        plt.yscale("log")
+        plt.show()
+
+        print("")       
 
 
 
