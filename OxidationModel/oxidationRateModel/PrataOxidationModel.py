@@ -114,19 +114,17 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
         return w_s, w_Os, w_Oss
 
-    def fun_f_CO(self, Tw, t):
+    def fun_f_CO(self, Tw, t, k, w_s, w_Os, w_Oss):
         """
         compute the flux of CO product to the surface
 
         :param Tw: surface temperature [K]
         :return: f_CO = d[CO]/dt flux of CO product to the surface [mol/m2/s]
         """
-        k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_CO = k["kO3"] * self.w_O * w_Os + k["kO7"] * self.w_O * w_Oss
         return f_CO
     
-    def fun_f_O(self, Tw, t):
+    def fun_f_O(self, Tw, t, k, w_s, w_Os, w_Oss):
         """
         compute the flux of O product to the surface
 
@@ -134,34 +132,26 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :return: f_O = d[O]/dt flux of O product to the surface [mol/m2/s]
         """
         press_O = self.p_beam # O-atom pressure [Pa] assume x_O = 1
-        k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_O = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * self.T_beam)) - k["kO1"] * self.w_O * w_s + k["kO2"] * w_Os - k["kO4"] * self.w_O * w_Os - k["kO5"] * self.w_O * w_s + k["kO6"] * w_Oss + 0
         return f_O
     
-    def fun_f_O2(self, Tw, t):
+    def fun_f_O2(self, Tw, t, k, w_s, w_Os, w_Oss):
         """
         compute the flux of O2 product to the surface
 
         :param Tw: surface temperature [K]
         :return: f_O2 = d[O2]/dt flux of O2 product to the surface [mol/m2/s]
         """
-        press_O2 = 0 # O2 pressure [Pa] assume x_O2 = 0
-        k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_coverage(k)
-        # press_O2/(self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * self.T_beam)) # not used in dwdt because m_O2 not defined
         f_O2 = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
         return f_O2
     
-    def fun_f_CO2(self, Tw, t):
+    def fun_f_CO2(self, Tw, t, k, w_s, w_Os, w_Oss):
         """
         compute the flux of CO2 product to the surface
 
         :param Tw: surface temperature [K]
         :return: f_CO2 = d[CO2]/dt flux of CO2 product to the surface [mol/m2/s]
         """
-        k = self.compute_rates(Tw)
-        w_s, w_Os, w_Oss = self.surface_coverage(k)
         f_CO2 = k["kO4"] * self.w_O * w_Os 
         return f_CO2
     
@@ -171,17 +161,21 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
         :param Tw: surface temperature [K]
         :return: [p_CO, p_O]: probability of products after one time step of 1 sec [-]
-        """ 
+        """
+        # compute reaction rates and surface coverage
+        k = self.compute_rates(Tw)
+        w_s, w_Os, w_Oss = self.surface_coverage(k)
+
         # flux of products
         t_span = (0,1)
         t_eval = np.linspace(t_span[0], t_span[1],2)
-        sol_CO = odeint(self.fun_f_CO, Tw, t_eval)
+        sol_CO = odeint(self.fun_f_CO, Tw, t_eval, args=(k,w_s,w_Os,w_Oss))
         f_CO=sol_CO[1]-sol_CO[0]
-        sol_O = odeint(self.fun_f_O, Tw, t_eval)
+        sol_O = odeint(self.fun_f_O, Tw, t_eval, args=(k,w_s,w_Os,w_Oss))
         f_O=sol_O[1]-sol_O[0]
-        sol_O2 = odeint(self.fun_f_O2, Tw, t_eval)
+        sol_O2 = odeint(self.fun_f_O2, Tw, t_eval, args=(k,w_s,w_Os,w_Oss))
         f_O2=sol_O2[1]-sol_O2[0]
-        sol_CO2 = odeint(self.fun_f_CO2, Tw, t_eval)
+        sol_CO2 = odeint(self.fun_f_CO2, Tw, t_eval, args=(k,w_s,w_Os,w_Oss))
         f_CO2=sol_CO2[1]-sol_CO2[0]
 
         # probabilities
