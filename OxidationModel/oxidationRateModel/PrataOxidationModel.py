@@ -12,7 +12,7 @@ import math
 from scipy.integrate import odeint
 from scipy.optimize import fsolve
 import numpy as np
-import sys
+import sys, os
 
 class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
     """Oxidation class using Prata model
@@ -42,6 +42,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
 
     def __init__(self):
         print("Initialize PrataOxidationModel class")
+        print("flux =",str(self.f_Oin*self.Av),"[atoms/m2/s]")
         self.plot_model_prediction()
         self.plot_surface_coverage()
         return
@@ -97,6 +98,12 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         D3 = 0
 
         def func_s(w_s):
+            """
+            compute the function for the steady-state surface density of empty sites
+
+            :param w_s: steady-state surface density of empty sites [mol/m2]
+            :return: f = 0, function for computing the steady-state surface density of empty sites
+            """
             f = - w_s + self.B\
                    - 2 * (A1 * w_s**2 + B1 * w_s) / (D1 + math.sqrt(D1**2 + 4 * C1 * (A1 * w_s**2 + B1 * w_s)))\
                    - 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
@@ -210,7 +217,8 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.xlim(800,2400)
         plt.ylim(-0.1,1)
         plt.grid()
-        plt.savefig('/Users/jmeuriss/Desktop/fig1.png', transparent=True)
+        home_dir=os.getenv("HOME")
+        plt.savefig(home_dir+'/Desktop/fig1.png', transparent=True)
         plt.show()     
 
     def plot_surface_coverage(self):
@@ -238,7 +246,8 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.yscale("log")
         plt.xlim(800,2000)
         plt.ylim(1e-4,1)
-        plt.savefig('/Users/jmeuriss/Desktop/fig2.png', transparent=True)
+        home_dir=os.getenv("HOME")
+        plt.savefig(home_dir+'/Desktop/fig2.png', transparent=True)
         plt.show()
 
 
