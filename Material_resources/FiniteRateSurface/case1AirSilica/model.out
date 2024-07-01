@@ -1,0 +1,170 @@
+ Air-Silica Catalysis: 5 gas species, 10 surf. reactions (Marschall 2009)
+ ------------------------------------------------
+ Number of Surface and bulk phases (gas phase=1 by definition)
+ nsp, nbp
+   1    0
+
+ Blowing/pyrolyzing gas flows? (0=NO, 1=Yes)
+ nblwflag
+ 0
+
+ Number of gas phase species participating in surface reactions
+ Name      ngps  #Phase
+ Air5s        5      1
+
+ For each surface phase: list name, surface fraction and
+ number of active site sets, and thermo availability (0=No,1=Yes)
+ Name       sfrc     nspas  iThermo  #Phase
+ Silica     1.000    1      0        2
+
+ For each surface phase with 1 or more sets of active sites, list
+ the site density and number ofspecies for each active site set
+ sdenas (mol/m2)      nspass     phase#/site#
+  7.50000E-06         3          2/  1
+
+ Order of gas species
+ Name        Molar mass     Ediss          #Species
+ N2          0.02801600     9.4500E+05      1
+ O2          0.03200000     4.9800E+05      2
+ NO          0.03000800     6.3100E+05      3
+ N           0.01400800     0.0000E+00      4
+ O           0.01600000     0.0000E+00      5
+
+ Order of surface species for Phase # 2(number each consecutively)
+ Name   Molar mass     Edes           #Species
+ E(s1)  0.00000000     0.0000E+00      6
+ N(s1)  0.01400800     3.5000E+05      7
+ O(s1)  0.01600000     3.5000E+05      8
+
+ Total number of surface reactions
+ nsrt
+  10
+
+ Reactant/product species for each forward surface reaction
+ 5, 6, 0, 8, 0, 0      #  1
+ 4, 6, 0, 7, 0, 0      #  2
+ 5, 8, 0, 2, 6, 0      #  3
+ 4, 7, 0, 1, 6, 0      #  4
+ 5, 7, 0, 3, 6, 0      #  5
+ 4, 8, 0, 3, 6, 0      #  6
+ 8, 0, 0, 2, 6, 0      #  7
+ 7, 0, 0, 1, 6, 0      #  8
+ 8, 7, 0, 3, 6, 0      #  9
+ 7, 8, 0, 3, 6, 0      # 10
+
+ Stoichiometric coefficients for each surface reaction
+ 1, 1, 0, 1, 0, 0      #  1
+ 1, 1, 0, 1, 0, 0      #  2
+ 1, 1, 0, 1, 1, 0      #  3
+ 1, 1, 0, 1, 1, 0      #  4
+ 1, 1, 0, 1, 1, 0      #  5
+ 1, 1, 0, 1, 1, 0      #  6
+ 2, 0, 0, 1, 2, 0      #  7
+ 2, 0, 0, 1, 2, 0      #  8
+ 1, 1, 0, 1, 2, 0      #  9
+ 1, 1, 0, 1, 2, 0      # 10
+
+ Reaction parameters for each type of reaction:
+ Arrhenius:             0,   Cf, beta,   Ea, isrfon, isrbon
+ Adsorption:            1,   S0, beta, Eads, isrfon, isrbon
+ Eley-Rideal:           2,  Ger, beta,  Eer, isrfon, isrbon
+ Langmuir-Hinschelwood: 3,  Clh, beta,   Em, isrfon, isrbon
+ Sublimation:           4, a0Pv, beta, Esub, isrfon, isrbon
+ Arrhenius Adsorption:  5,   Cf, beta,   Ea, isrfon, isrbon
+ 1,  5.0000E-02,  0.0000E+00,  0.0000E+00, 1, 1
+ 1,  5.0000E-02,  0.0000E+00,  0.0000E+00, 1, 1
+ 2,  1.0000E-03,  0.0000E+00,  9.0000E+03, 1, 1
+ 2,  1.0000E-03,  0.0000E+00,  9.0000E+03, 1, 1
+ 2,  1.0000E-03,  0.0000E+00,  9.0000E+03, 1, 1
+ 2,  1.0000E-03,  0.0000E+00,  9.0000E+03, 1, 1
+ 3,  1.0000E-01,  0.0000E+00,  3.0000E+05, 1, 1
+ 3,  1.0000E-01,  0.0000E+00,  3.0000E+05, 1, 1
+ 3,  1.0000E-01,  0.0000E+00,  3.0000E+05, 1, 1
+ 3,  1.0000E-01,  0.0000E+00,  3.0000E+05, 1, 1
+
+ Desorption reaction or equilibrium constant parameters:
+ Type 1: Desorption:
+         Form 0: Arrhenius
+         Form 1: Constant attempt frequency
+         Form 2: Simple transition state theory
+         Form 3: Complex transition state theory
+ Type 2: Equilibrium:
+         Form 0: Arrhenius
+         Form 1: Immobile adsorption - simple transition state theory
+         Form 2: Immobile adsorption - complex transition state theory
+         Form 3: Mobile adsorption - simple transition state theory
+         Form 4: Mobile adsorption - complex transition state theory
+ Type, Form, Cf, eta, vdes, Edes
+ 1, 1,  1.0000E+00,  0.0000E+00,  1.0000E+12,  3.5000E+05  #  1
+ 1, 1,  1.0000E+00,  0.0000E+00,  1.0000E+12,  3.5000E+05  #  2
+
+      --------------------     
+
+Finite Rate Model Version 3-0
+Inert Surface Fraction    0.0000
+Surface Density           7.5000E-06
+Inert Bulk Fraction       0.0000
+Bulk density              0.0000E+00
+Bulk Porosity             0.0000
+
+      --------------------     
+
+ Gibbs Free-energy data from Lewis database
+ N2
+         2.000E+02     1.000E+03
+      2.210371E+04 -3.818461E+02  6.082738E+00 -8.530914E-03  1.384646E-05
+     -9.625793E-09  2.519706E-12  0.000000E+00  7.108459E+02 -1.076003E+01
+         1.000E+03     6.000E+03
+      5.877099E+05 -2.239243E+03  6.066943E+00 -6.139653E-04  1.491798E-07
+     -1.923094E-11  1.061949E-15  0.000000E+00  1.283206E+04 -1.586635E+01
+         6.000E+03     2.000E+04
+      8.309712E+08 -6.420482E+05  2.020205E+02 -3.065020E-02  2.486856E-06
+     -9.705792E-11  1.437517E-15  0.000000E+00  4.938507E+06 -1.672048E+03
+ O2
+         2.000E+02     1.000E+03
+     -3.425563E+04  4.847000E+02  1.119012E+00  4.293887E-03 -6.836273E-07
+     -2.023375E-09  1.039041E-12  0.000000E+00 -3.391454E+03  1.849699E+01
+         1.000E+03     6.000E+03
+     -1.037940E+06  2.344833E+03  1.819729E+00  1.267849E-03 -2.188071E-07
+      2.053724E-11 -8.193491E-16  0.000000E+00 -1.689013E+04  1.738718E+01
+         6.000E+03     2.000E+04
+      4.975153E+08 -2.866023E+05  6.690155E+01 -6.169719E-03  3.016238E-07
+     -7.420879E-12  7.277441E-17  0.000000E+00  2.293488E+06 -5.530450E+02
+ NO
+         2.000E+02     1.000E+03
+     -1.143917E+04  1.536468E+02  3.431469E+00 -2.668592E-03  8.481399E-06
+     -7.685111E-09  2.386798E-12  0.000000E+00  9.097950E+03  6.728728E+00
+         1.000E+03     6.000E+03
+      2.239037E+05 -1.289656E+03  5.433940E+00 -3.656055E-04  9.881018E-08
+     -1.416083E-11  9.380216E-16  0.000000E+00  1.750294E+04 -8.501699E+00
+         6.000E+03     2.000E+04
+     -9.575308E+08  5.912437E+05 -1.384567E+02  1.694340E-02 -1.007351E-06
+      2.912585E-11 -3.295111E-16  0.000000E+00 -4.677503E+06  1.242082E+03
+ N
+         2.000E+02     1.000E+03
+      0.000000E+00  0.000000E+00  2.500000E+00  0.000000E+00  0.000000E+00
+      0.000000E+00  0.000000E+00  0.000000E+00  5.610464E+04  4.193909E+00
+         1.000E+03     6.000E+03
+      8.876501E+04 -1.071231E+02  2.362188E+00  2.916720E-04 -1.729515E-07
+      4.012658E-11 -2.677228E-15  0.000000E+00  5.697351E+04  4.865236E+00
+         6.000E+03     2.000E+04
+      5.475181E+08 -3.107575E+05  6.916783E+01 -6.847988E-03  3.827572E-07
+     -1.098368E-11  1.277986E-16  0.000000E+00  2.550586E+06 -5.848770E+02
+ O
+         2.000E+02     1.000E+03
+     -7.953611E+03  1.607178E+02  1.966226E+00  1.013670E-03 -1.110415E-06
+      6.517507E-10 -1.584779E-13  0.000000E+00  2.840362E+04  8.404242E+00
+         1.000E+03     6.000E+03
+      2.619020E+05 -7.298722E+02  3.317177E+00 -4.281334E-04  1.036105E-07
+     -9.438304E-12  2.725038E-16  0.000000E+00  3.392428E+04 -6.679585E-01
+         6.000E+03     2.000E+04
+      1.779004E+08 -1.082328E+05  2.810778E+01 -2.975232E-03  1.854998E-07
+     -5.796232E-12  7.191720E-17  0.000000E+00  8.890943E+05 -2.181728E+02
+ E(s1)
+         0.000E+00     1.000E+10
+      0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+      0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ N(s1)
+     Not using Gibbs data!
+ O(s1)
+     Not using Gibbs data!

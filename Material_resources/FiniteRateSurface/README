@@ -1,0 +1,70 @@
+=============== SRModel =========================
+version: 3.8
+date:    5/12/2011
+authors: Matthew MacLean (maclean@cubrc.org)
+         Joe Marschall (jochen.marschall@sri.com)
+=================================================         
+
+
+This README file gives basic instructions and information about the stand-alone code SRModel and related utilities.
+
+
+filelist:
+--------
+
+      surf/                => directory containing several example Finite rate surface model systems.      
+      FiniteRateSurface.F  => Common subroutines to operate the model.  This file
+                              is used both in stand-alone mode and inside DPLR.
+      Makefile             => Makefile for GNU make or similar.
+      input.inp            => Small input file with settings to control stand-alone
+      			      code, srmodel (input flags defined at the bottom of the file).
+      lewis.bulk           => Lewis Free-energy data for bulk phase species. 
+      			      (Gordon & McBride)
+      lewis.thermo         => Lewis Free-energy data for gas phase species.  This
+      			      is the same as the data read by DPLR. (Gordon & McBride)
+      lumatrix.F           => routined to perform LU decomposition to solve an
+      			      arbitrary matrix system (not required by DPLR).
+      main-check-ders.F    => A utility program to check derivatives numerically.
+      main-check-inputs.F  => A utility program to parse data and compare output
+      			      to the original code from Marschall.
+      main-check-system.F  => A utility to compute implicit and explicit rate data and
+      			      compare Jacobians numerically.
+      main-srmodel.F       => Main routine for stand-alone code.
+      readlewis.F          => Read in the lewis.thermo file (not required by DPLR).
+      surfacemod.F         => Module containing arrays and type declarations that
+      			      are used for both stand-alone code and DPLR
+      equilibrium.F        => free-energy minimization routines
+
+
+compiling:
+---------
+
+Adjust the included Makefile by changing the environment variables to appropriate
+defaults for your system --
+
+      F90C  => (required) => Name (and path if necessary) to a Fortran 90 compiler.
+                             gfortran is a good choice.
+      FOPTS => (optional) => Compiler arguments for the main code, srmodel.
+      			     This would typically be optimization flags or 
+                             additional include requirements.  It is okay to
+                             leave this field blank.
+      FDIAG => (optional) => Compiler arguments for diagnostic utilities.
+      			     This could be to turn on debugging symbols or
+                             array bounds checking.  It is okay to
+                             leave this field blank.
+
+Then just run "make" to build all the utilities.
+
+utilities:
+---------
+
+      srmodel     => Main stand-alone code. Run it as ./srmodel
+                     Requires the file input.inp to read in settings.
+      checksystem => A utility that numerically verifies the Jacobian of a 
+                     single iteration of the model.
+                     Requires the file input.inp to read in settings.
+      checkders   => A simple utility to numerically check the derivatives
+                     of every form of forward rate and equilibrium constant
+                     mechanism using hard-wired parameters.
+      checkinputs => A simple utility just to check the data read in for 
+                     consistency with the Marschall Srmodel3.f Fortran 77 code.

@@ -1,0 +1,13 @@
+Blowing gas file for PICA VIR v1
+---------------------------------------------------------
+0	EBC type (0: mdotg (kg/s)) (1: cyield) (2: cyield, ha (J/kg))
+1       Number of blowing/pyrolyzing flows 
+0.01	mdotg (kg/s)  
+0.0	O2      mole fractions in blowing gas
+0.0 	O
+0.0	N
+0.0	CO      
+0.0	CN
+0.0	C3
+0.333   H2O     Indepth pyrolysis
+0.667   CH2     Indepth pyrolysis

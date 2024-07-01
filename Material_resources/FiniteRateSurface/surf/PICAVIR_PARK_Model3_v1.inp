@@ -1,0 +1,98 @@
+  PICA VIR /Park Model: 8 gas species, 5 surf. reac. (Marschall 2010)
+------------------------------------------------------------------------
+Number of surface and bulk phases (gas phase=1 by definition) 
+nsp, nbp
+3    3
+
+Blowing/pyrolyzing gas flows?(0=NO, 1=Yes) and Surface Initialization (0=empty sites, 1=QSS)
+nblwflag     initsurf
+1            0
+
+Number of gas phase species in surface reaction and blowing model 
+Name      ngps  #Phase
+Air8s     8      1
+
+For each surface phase: list  name, surface fraction, 
+number of active site sets, thermo availability (0=No, 1=Yes)
+Name      sfrc       nspas     iThermo    #Phase
+FFormS     0.1106    1         0          2
+PhenolS    0.0894    0         0          3
+PoreS      0.8       0         0          4
+
+For each surface phase with 1 or more sets of active sites, list
+the site density and number of species for each active site set
+sdenas (mol/m2)      nspass       #phase#sites
+7.5d-06              1             2/1
+
+For each bulk phase: list  name, mass density, porosity, 
+phase volume fraction and number of bulk species 
+Name      density      porosity     vol. frac.    nbps      #Phase
+FFormB    1370.0       0.0          0.1106           1         5
+PhenolB   1297.0       0.0          0.0894           0         6
+PoreB     0.0          1.0          0.80             0         7
+
+Order of gas species
+Name      Molar mass  Ediss     #Species  Dissociation Reaction
+O2        0.03200000  493440.0   1		O2=>O+O
+O         0.01600000  0.0        2
+N         0.01400800  0.0        3
+CO        0.02801100  1071726.0  4		CO=>C+O
+CN        0.02601900  745166.0   5		CN=>C+N
+C3        0.03603300  1302582.0  6		C3=>C+C+C
+H2O       0.01801600  0.0        7             
+CH2       0.01402700  0.0        8
+
+Order of surface species (number each consecutively)
+Name      Molar mass  Ed              #Species
+E(s1)     0.00000000  0.0                 9 
+ 
+Order of bulk species (number each consecutively)
+Name      Molar mass  Mole fraction     #Species
+C(b1)      0.01201100  1.0                 10 
+
+Total number of surface reactions
+nsrt
+5
+
+Reactant/product species for each forward surface reaction
+ 2, 9, 10, 4, 9, 0 		#1   O + (s1) + C(b1) <---> CO + (s1)
+ 1, 9, 10, 4, 9, 0 		#2   O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+ 3, 9, 10, 5, 9, 0		#3   N + (s1) +C(b1) <---> CN + (s1)
+ 9,10, 0,  6, 9, 0		#4   3(s1) + 3C(b1) <---> C3 + 3(s1)
+ 6, 9, 0,  9,10, 0		#5   C3 + 3(s1) <---> 3(s1) + 3C(b1) 
+
+Stoichiometric coefficients for each surface reaction 
+1, 1, 1, 1, 1, 0 		#1   O + (s1) + C(b1) <---> CO + (s1)
+1, 2, 2, 2, 2, 0 		#2   O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+1, 1, 1, 1, 1, 0		#3   N + (s1) +C(b1) <---> CN + (s1)
+3, 3, 0, 1, 3, 0		#4   3(s1) + 3C(b1) <---> C3 + 3(s1)
+1, 3, 0, 3, 3, 0		#5   C3 + 3(s1) <---> 3(s1) + 3C(b1)
+
+Reaction parameters for each type of reaction:
+Type 0: Arrhenius:		0, Cf,         beta, Ea,   isrfon, isrbon
+Type 1: Adsorption:		1, S0(0 to 1), beta, Eads, isrfon, isrbon
+Type 2: Eley-Rideal:		2, Ger(0 to 1),beta, Eer,  isrfon, isrbon
+Type 3: Langmuir-Hinschelwood:	3, Clh(0 to 1),beta, Em,   isrfon, isrbon
+Type 4: Sublimation   a0Pv(T)	4, a0Pv0,      beta, Esub, isrfon, isrbon
+Type 5: Arrhenius Adsorption:	5, Cf,         beta, Ea,   isrfon, isrbon
+
+2, 0.63d+00, 0.0d+00, 9.6440d+03, 1, 0	#1 O + (s1) + C(b1) <---> CO + (s1)
+2, 0.5d+00, 0.0d+00, 0.0000d+00, 1, 0	#2 O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+2, 0.3d+00, 0.0d+00, 0.0000d+00, 1, 0	#3 N + (s1) +C(b1) <---> CN + (s1)
+4, 5.19d-13, 0.0d+00, 7.7581d+05, 1, 0	#4 3(s1) + 3C(b1) <---> C3 + 3(s1)
+2, 1.0d-01, 0.0d+00, 0.0000d+00, 1, 0	#5 C3 + 3(s1) <---> 3(s1) + 3C(b1)
+
+Desorption reaction or equilibrium constant parameters:
+Type 1: Desorption: 		
+	Form 0:	Arrhenius
+	Form 1:	Constant attempt frequency
+        Form 2:	Simple transition state theory	
+        Form 3:	Complex transition state theory	
+Type 2: Equilibrium:		
+	Form 0:	Arrhenius
+        Form 1:	Immobile adsorption - simple transition state theory	
+        Form 2:	Immobile adsorption - complex transition state theory	
+        Form 3:	Mobile adsorption - simple transition state theory	
+        Form 4:	Mobile adsorption - complex transition state theory	
+Type, Form, Cf, eta, vdes, Edes
+

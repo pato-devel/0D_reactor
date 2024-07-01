@@ -1,0 +1,87 @@
+[surface file name]
+'../surf/Air_Silica_Model3_v1.inp'
+
+output conv freq,  file save freq,   [output file name]
+         1000,             1,   'short-output.dat'
+
+Tw (K),  Ptotal (Pa),    gas phase model,      scan mode
+ 2000.,	      20000.,                  0,              0
+
+ dt(s),     num steps,    time order,     diagnostic,      equilibrium
+2.0d-8,          3000,             2,              2,               -1
+
+[number of gas phase species]
+5
+
+[name and mole fraction of each species]
+'N2',   0.79
+'O2',   0.21
+'NO',   0.00
+ 'N',   0.00
+ 'O',   0.00
+=====================================================================
+
+Pressure & Temperature Scan (-1.0 to end)
+Ptotal(Pa)  Tw (K)
+    -1.,      -1.
+ 
+Mole Fraction Scan (-1.0 to end)
+  yN2    yO2    yNO     yN     yO
+  -1.,   -1.,   -1.,   -1.,   -1.
+
+=====================================================================
+
+surface file name | surface chemistry file name
+
+output conv freq  | number of iterations between convergence 
+                    write to STDOUT (<=0 for no output)
+
+file save freq    | number of iterations between concentration
+                    write to "output file name" (<=0 for no output)
+
+output file name  | file to write concentration data to
+
+Tw                | surface wall temperature (deg K)
+
+Ptotal            | gas phase pressure (Pascals)
+
+gas phase model   | 0 = constant volume gas phase 
+                    1 = frozen gas phase concentrations (+constant volume)
+                    2 = constant pressure gas phase
+
+scan mode         | 0 = scan mode off
+                    1 = scan mode on: read additional data below mole fraction record
+                                      to run parametrics scans of P,T and mole fractions
+                                      (turns off most diagnostics outputs)
+
+dt                | time step/constant (seconds)
+
+num steps         | number of iterations
+
+time order        | 0 = explicit
+                    1 = Euler implicit
+                    2 = 3-pt backwards implicit
+
+diagnostic        | 1 = compute Gibbs free energy minimization
+                    2 = output finite rate diagnostics  
+                    3 = output finite rate diagnostics plus write FRM system file back out
+
+equilibrium       | -1 = compute Gibbs free-energy minimization
+                         consistent with finite rate solution
+                     0 = compute T,V Gibbs free-energy minimization
+                     1 = compute T,V Gibbs free-energy minimization
+                         with frozen gas phase species
+                     2 = compute P,T Gibbs free-energy minimization
+
+number of gas phase species | number of species to follow
+                             (must match requirement in chemistry file)
+
+name and mole fraction of each species | gas phase mole fractions
+
+Pressure & Temperature Scan | scan records for pressure and temperature
+                              (only if "scan mode" is 1)
+                              (read until <0.0 is found)
+
+Mole Fraction Scan | scan records for pressure and temperature
+                     (only if "scan mode" is 1)
+                     (read until <0.0 is found)

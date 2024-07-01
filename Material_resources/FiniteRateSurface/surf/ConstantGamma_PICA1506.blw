@@ -1,0 +1,11 @@
+Blowing gas file for PICA1506 (Driver & MacLean 2011-0141)
+----------------------------------------------------------
+2	EBC type (0: mdotg (kg/s)) (1: cyield) (2: cyield, ha (J/kg))
+0.83682  -1.0d6
+0.0	O2     <= begin mole fractions for steady state pyrolysis
+0.0 	N2
+0.0	O
+0.0	N      
+0.2	CO      mg(CO) = 0.051*(wB)
+0.6	H2      mg(H2) = 0.153*(wB)
+0.2	C       mg(C)  = 0.051*(wB)

@@ -1,0 +1,82 @@
+O2-Silica Catalysis: 2 gas species, 5 surf. reactions (Norman, Schwartzentruber 2012)
+-------------------------------------------------------------------------------------
+Number of surface and bulk phases (gas phase=1 by definition) 
+nsp, nbp
+1    0
+
+Blowing/pyrolyzing gas flows?(0=NO, 1=Yes) and Surface Initialization (0=empty sites, 1=QSS)
+nblwflag     initsurf
+0            0
+
+Number of gas phase species participating in surface reactions 
+Name      ngps  #Phase
+Oxygen2s     2      1
+
+For each surface phase: list  name, surface fraction, 
+number of active site sets, thermo availability (0=NO, 1=Yes)
+Name      sfrc         nspas      iThermo    #Phase
+Silica    1.0          1          0          2
+
+For each surface phase with 1 or more sets of active sites, list
+the site density and number of species for each active site set 
+sdenas (mol/m2)     nspass
+4.2286d-06             3
+
+Order of gas species
+Name      Molar mass  Ediss     #Species  
+O2        0.03200000  498000.0	1
+O         0.01600000  0.0	2
+
+Order of surface species (number each consecutively)
+Name      Molar mass  Edes      #Species
+E(s1)     0.00000000  0.0       3 
+O(s1)     0.01400800  404000.0	4
+O2(s1)    0.03200000  274000.0  5
+
+Total number of surface reactions
+nsrt
+5
+
+Reactant/product species for each forward surface reaction
+2, 3, 0, 4, 0, 0 			#1   O + (s1)   <---> O(s1)
+2, 4, 0, 1, 3, 0 			#2   O + O(s1)  <---> O2 + (s1)
+2, 4, 0, 5, 0, 0			#3   O + O(s1)  <---> O2(s1)
+2, 5, 0, 1, 4, 0			#4   O + O2(s1) <---> O2 + O(s1)
+1, 3, 0, 5, 0, 0			#5   O2 + (s1)  <---> O2(s1)
+
+Stoichiometric coefficients for each surface reaction 
+1, 1, 0, 1, 0, 0 			#1   O + (s1)   <---> O(s1)
+1, 1, 0, 1, 1, 0 			#2   O + O(s1)  <---> O2 + (s1)
+1, 1, 0, 1, 0, 0			#3   O + O(s1)  <---> O2(s1)
+1, 1, 0, 1, 1, 0			#4   O + O2(s1) <---> O2 + O(s1)
+1, 1, 0, 1, 0, 0			#5   O2 + (s1)  <---> O2(s1)
+
+Reaction parameters for each type of reaction:
+Type 0: Arrhenius:		0, Cf,         beta, Ea,   isrfon, isrbon
+Type 1: Adsorption:		1, S0(0 to 1), beta, Eads, isrfon, isrbon
+Type 2: Eley-Rideal:		2, Ger(0 to 1),beta, Eer,  isrfon, isrbon
+Type 3: Langmuir-Hinschelwood:  3, Clh(0 to 1),beta, Em,   isrfon, isrbon
+Type 4: Sublimation             4, a0Pv,       beta, Esub, isrfon, isrbon
+Type 5: Arrhenius Adsorption:	5, Cf,         beta, Ea,   isrfon, isrbon
+
+1, 1.00d+00, 0.0d+00, 0.0000d+00, 1, 1			#1
+2, 1.69d-01, 0.0d+00, 3.8665d+04, 1, 1			#2
+2, 8.50d-01, 0.0d+00, 1.4365d+04, 1, 1			#3
+2, 1.72d-01, 0.0d+00, 2.9208d+04, 1, 1			#4
+1, 1.00d+00, 0.0d+00, 0.0000d+00, 1, 1			#5
+
+Desorption reaction or equilibrium constant parameters:
+Type 1: Desorption: 		
+	Form 0:	Arrehenius
+	Form 1:	Constant attempt frequency
+        Form 2:	Simple transition state theory	
+        Form 3:	Complex transition state theory	
+Type 2: Equilibrium:		
+	Form 0:	Arrehenius
+        Form 1:	Immobile adsorption - simple transition state theory	
+        Form 2:	Immobile adsorption - complex transition state theory	
+        Form 3:	Mobile adsorption - simple transition state theory	
+        Form 4:	Mobile adsorption - complex transition state theory	
+Type, Form, Cf, eta, vdes, Edes
+1, 1, 1.0, 0.0, 1.00d+14, 4.04d+05
+1, 1, 1.0, 0.0, 4.65d+13, 2.74d+05

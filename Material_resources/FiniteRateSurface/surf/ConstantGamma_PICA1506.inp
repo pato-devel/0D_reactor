@@ -1,0 +1,94 @@
+M1506 Oxidation v1: 7 gas species, 4 surf. reac., + pyrolysis (Driver & MacLean 2011-0141)
+------------------------------------------------------------------------------------------
+Number of surface and bulk phases (gas phase=1 by definition) 
+nsp, nbp
+2    1
+
+Blowing/pyrolyzing gas flows?(0=NO, 1=Yes) and Surface Initialization (0=empty sites, 1=QSS)
+nblwflag     initsurf
+1             0
+
+Number of gas phase species in surface reaction and blowing model 
+Name      ngps  #Phase
+Air7s     7      1
+
+For each surface phase: list  name, surface fraction, 
+number of active site sets, thermo availability (0=No, 1=Yes)
+Name      sfrc       nspas     iThermo    #Phase
+Carbon1   1.0        1         0          2
+Carbon2   1.0        1         0          3
+
+For each surface phase with 1 or more sets of active sites, list
+the site density and number of species for each active site set
+sdenas (mol/m2)      nspass       
+3.0d-5               2    
+3.0d-5               1    
+
+For each bulk phase: list  name, mass density, porosity, 
+phase volume fraction and number of bulk species 
+Name      density      porosity     vol. frac.    nbps
+Char       218.0       0.0          1.0           1
+
+Order of gas species
+Name      Molar mass      Ediss  #Species  Dissociation Reaction
+O2        0.03200000   493440.0  1		O2=>O+O
+N2        0.02801600   945000.0  2              N2=>N+N
+O         0.01600000        0.0  3
+N         0.01400800        0.0  4
+CO        0.02801100  1071726.0  5		CO=>C+O
+H2        0.00201600   857280.0  6              H2=>H+H
+C         0.01201100        0.0  7
+
+Order of surface species (number each consecutively)
+Name      Molar mass  Ed              #Species
+E(s1)     0.00000000  0.0             8
+N(s1)     0.01400800  350000.0	  9
+E(s2)     0.00000000  0.0             10
+ 
+Order of bulk species (number each consecutively)
+Name      Molar mass  Mole fraction     #Species
+C(b1)      0.01201100  1.0                11 
+
+Total number of surface reactions
+nsrt
+4
+
+Reactant/product species for each forward surface reaction
+3,10,11, 5,10, 0 		#1   O + (s1) + C(b1) <---> CO + (s1)
+1,10,11, 5,10, 0 		#2   O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+4, 8, 0, 9, 0, 0 	        #3   N + (s1) <---> N(s1)
+4, 9, 0, 2, 8, 0 		#4   N + N(s1) <---> N2 + (s1)
+
+Stoichiometric coefficients for each surface reaction 
+1, 1, 1, 1, 1, 0 		#1   O + (s1) + C(b1) <---> CO + (s1)
+1, 2, 2, 2, 2, 0 		#2   O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+1, 1, 0, 1, 0, 0		#3   N + (s1) <---> N(s1)
+1, 1, 0, 1, 1, 0		#4   N + N(s1) <---> N2 + (s1)
+
+Reaction parameters for each type of reaction:
+Type 0: Arrhenius:		0, Cf,         beta, Ea,   isrfon, isrbon
+Type 1: Adsorption:		1, S0(0 to 1), beta, Eads, isrfon, isrbon
+Type 2: Eley-Rideal:		2, Ger(0 to 1),beta, Eer,  isrfon, isrbon
+Type 3: Langmuir-Hinschelwood:	3, Clh(0 to 1),beta, Em,   isrfon, isrbon
+Type 4: Sublimation   a0Pv(T)	4, a0Pv0,      beta, Esub, isrfon, isrbon
+Type 5: Arrhenius Adsorption:	5, Cf,         beta, Ea,   isrfon, isrbon
+Type, A, beta, Ea, isrfon, isrbo
+2, 0.90d+00, 0.0d+00, 0.0000d+00, 1, 0	  #1 O + (s1) + C(b1) <---> CO + (s1)
+2, 0.01d+00, 0.0d+00, 0.0000d+00, 1, 0	  #2 O2 + 2(s1) +2C(b1) <---> 2CO + 2(s1)
+1, 0.05d+00, 0.0d+00, 0.0000d+00, 1, 0	  #3 N + (s1) <---> N(s1)
+2, 0.05d+00, 0.0d+00, 0.0000d+00, 1, 0	  #4 N + N(s1) <---> N2 + (s1)
+
+Desorption reaction or equilibrium constant parameters:
+Type 1: Desorption: 		
+	Form 0:	Arrhenius
+	Form 1:	Constant attempt frequency
+        Form 2:	Simple transition state theory	
+        Form 3:	Complex transition state theory	
+Type 2: Equilibrium:		
+	Form 0:	Arrhenius
+        Form 1:	Immobile adsorption - simple transition state theory	
+        Form 2:	Immobile adsorption - complex transition state theory	
+        Form 3:	Mobile adsorption - simple transition state theory	
+        Form 4:	Mobile adsorption - complex transition state theory	
+Type, Form, Cf, eta, vdes, Edes
+1, 1, 1.0, 0.0, 1.e12, 350000.0

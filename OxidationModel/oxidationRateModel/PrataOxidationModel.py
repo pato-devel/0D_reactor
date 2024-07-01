@@ -236,10 +236,24 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
             w_Os.append(w_Os_i)
             w_Oss.append(w_Oss_i)
 
+        O_coverage_Prata =  np.loadtxt("data/O_coverage.dat",delimiter=',')
+        O_star_coverage_Prata =  np.loadtxt("data/O_star_coverage.dat",delimiter=',')
+        s_coverage_Prata =  np.loadtxt("data/s_coverage.dat",delimiter=',')
+        total_O_coverage_Prata =  np.loadtxt("data/total_O_coverage.dat",delimiter=',')
+
+
         plt.plot(Tw, np.array(w_Os)/self.B, 'r', label='w_Os')
+        plt.plot(O_coverage_Prata[:,0], O_coverage_Prata[:,1], 'r*', label='w_Os Prata')
+
         plt.plot(Tw, np.array(w_Oss)/self.B, 'b', label='w_Oss')
+        plt.plot(O_star_coverage_Prata[:, 0], O_star_coverage_Prata[:, 1], 'b*', label='w_Oss Prata')
+
         plt.plot(Tw, np.array(w_s)/self.B, 'k', label='w_s')
+        plt.plot(s_coverage_Prata[:, 0], s_coverage_Prata[:, 1], 'k*', label='w_s Prata')
+
         plt.plot(Tw, (np.array(w_Os)+np.array(w_Oss))/self.B, 'g', label='w_Os+w_Oss')
+        plt.plot(total_O_coverage_Prata[:, 0], total_O_coverage_Prata[:, 1], 'g*', label='w_Os+w_Oss Prata')
+
         plt.legend(loc='best')
         plt.xlabel('T [K]')
         plt.grid()
