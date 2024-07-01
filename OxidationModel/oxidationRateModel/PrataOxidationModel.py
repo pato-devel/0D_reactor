@@ -208,6 +208,18 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
             p_O.append(p_O_i)
             p_O2.append(p_O2_i)
             p_CO2.append(p_CO2_i)
+
+        p_CO_Prata = np.loadtxt("data/CO_probability.dat", delimiter=',')
+        p_CO2_Prata = np.loadtxt("data/CO2_probability.dat", delimiter=',')
+        p_O2_Prata = np.loadtxt("data/O2_probability.dat", delimiter=',')
+        p_O_Prata = np.loadtxt("data/O_probability.dat", delimiter=',')
+
+        plt.plot(p_CO_Prata[:,0], p_CO_Prata[:,1], 'k*', label='CO Prata')
+        plt.plot(p_CO2_Prata[:,0], p_CO2_Prata[:,1], 'r*', label='CO2 Prata')
+        plt.plot(p_O2_Prata[:,0], p_O2_Prata[:,1], 'g*', label='O2 Prata')
+        plt.plot(p_O_Prata[:,0], p_O_Prata[:,1], 'b*', label='O Prata')
+
+
         plt.plot(Tw, np.array(p_CO), 'k', label='CO')
         plt.plot(Tw, np.array(p_CO2), 'r', label='CO2')
         plt.plot(Tw, np.array(p_O2), 'g', label='O2')
@@ -235,6 +247,8 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
             w_s.append(w_s_i)
             w_Os.append(w_Os_i)
             w_Oss.append(w_Oss_i)
+
+        print("coverage sum",(np.array(w_s) + np.array(w_Os) + np.array(w_Oss))/self.B )
 
         O_coverage_Prata =  np.loadtxt("data/O_coverage.dat",delimiter=',')
         O_star_coverage_Prata =  np.loadtxt("data/O_star_coverage.dat",delimiter=',')
