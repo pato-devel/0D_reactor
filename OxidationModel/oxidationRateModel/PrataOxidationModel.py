@@ -25,10 +25,19 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
     """
 
     # constant values
+    x_in = {"O":1,"O2":0} # mole fraction of inflow gas [-]
+    if not ((x_in["O"] == 1 and x_in["O2"] == 0) or (x_in["O"] == 0 and x_in["O2"] == 1)):
+        print("Error: x_in[\"O\"] or x_in[\"O2\"] must equal to 1")
+        print("x_in =", x_in)
+        sys.exit()
     T_beam = 1000 # beam temperature [K]
     p_beam = 2.4e-2 # beam pressure [Pa]
     B = 1e-5 # total active site density [mol/m2]
     Mm_O = 0.0159994 # molar mass of oxygen [kg/mol]
+    Mm_C = 0.012011 # molar mass of carbon [kg/mol]
+    Mm_O2 = 2 * Mm_O # molar mass of O2 [kg/mol]
+    Mm_CO = Mm_C + Mm_O # molar mass of CO [kg/mol]
+    Mm_CO2 = Mm_C + 2 * Mm_O # molar mass of CO2 [kg/mol]
     Av =  6.022e23 # Avogadro number [1/mol]
     m_O = Mm_O / Av # mass of oxygen atom [kg]
     m_O2 = 2 * m_O # mass of oxygen [kg]
@@ -36,13 +45,16 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
     h = 6.62607015e-34 # Planck constant [J.s]
     R = 8.3144598 # Universal gas constant [J/mol/K]
     F_O = 1/4 * math.sqrt(8 * k_B * T_beam / (math.pi * m_O)) #  mean thermal speed of O-atom to the surface [m/s] 
-    w_O = p_beam / (R * T_beam) # [O] oxygen concentration [mol/m3]
+    w_O = x_in["O"] * p_beam / (R * T_beam) # [O] oxygen concentration [mol/m3]
     f_Oin = F_O * w_O # flux of O-atom to the surface = F_O [O] [mol/m2/s]
-    # F_O2 = 1/4 * math.sqrt(8 * k_B * T_beam / (math.pi * m_O2)) # flux of O2 to the surface = F_O2 [O2] [mol/m2/s]
+    F_O2 = 1/4 * math.sqrt(8 * k_B * T_beam / (math.pi * m_O2)) # mean thermal speed of O-atom to the surface [m/s] 
+    w_O2 = x_in["O2"] * p_beam / (R * T_beam) # [O2] oxygen concentration [mol/m3]
+    f_O2in = F_O2 * w_O2 # flux of O2 to the surface = F_O2 [O2] [mol/m2/s]
 
     def __init__(self):
         print("Initialize PrataOxidationModel class")
         print("flux =",str(self.f_Oin*self.Av),"[atoms/m2/s]")
+        self.plot_reaction_rates()
         self.plot_model_prediction()
         self.plot_surface_coverage()
         return
@@ -68,12 +80,11 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         k["kO7"] = self.F_O / self.B * 1000 * math.exp(-4000 /  Tw)
         k["kO8"] = math.sqrt(self.Av / self.B) * F_O_2D * 1e-3 * math.exp(-15000/ Tw)
         k["kO9"] = math.sqrt(self.Av / self.B) * F_O_2D * 5e-5 * math.exp(-15000/ Tw)
-
-        # k["kox1"] =  self.F_O2 / self.B**2 * math.exp(-8000 /  Tw)
-        # k["kox2"] =  self.F_O2 / self.B * 100 * math.exp(-4000 /  Tw)
-        # k["kox3"] =  self.F_O2 / self.B * math.exp(-500 /  Tw)
-        # k["kox4"] =  self.F_O2 / self.B**2 * math.exp(-8000 /  Tw)
-        # k["kox5"] =  self.F_O2 / self.B * 1000 * math.exp(-4000 /  Tw)
+        k["kox1"] =  self.F_O2 / self.B**2 * math.exp(-8000 /  Tw)
+        k["kox2"] =  self.F_O2 / self.B * 100 * math.exp(-4000 /  Tw)
+        k["kox3"] =  self.F_O2 / self.B * math.exp(-500 /  Tw)
+        k["kox4"] =  self.F_O2 / self.B**2 * math.exp(-8000 /  Tw)
+        k["kox5"] =  self.F_O2 / self.B * 1000 * math.exp(-4000 /  Tw)
 
         return k
 
@@ -84,14 +95,15 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param k: reaction rates [mol/m2/s]
         :return: steady-state surface density of w_s empty sites [mol/m2], of w_Os absorbed oxygen with weakly bound [mol/m2], and of w_Oss absorbed oxygen with relatively strong bound [mol/m2]
         """ 
-        A1 = 0 # 2 * k["kox1"] *  self.w_O2
+        A1 = 2 * k["kox1"] *  self.w_O2
         B1 = k["kO1"] *  self.w_O
         C1 = 2 * k["kO9"]
-        D1 = k["kO2"]+ (k["kO3"] + k["kO4"]) *  self.w_O + 0
-        A2 = 0
+        D1 = k["kO2"]+ (k["kO3"] + k["kO4"]) *  self.w_O + (k["kox2"] + k["kox3"]) * self.w_O2
+        A2 = 2 * k["kox4"] * self.w_O2
         B2 = k["kO5"] *  self.w_O
         C2 = 2 * k["kO8"]
-        D2 = k["kO6"] + k["kO7"] *  self.w_O + 0
+        D2 = k["kO6"] + k["kO7"] *  self.w_O + k["kox5"] * self.w_O2
+        # for [N]
         A3 = 0
         B3 = 0
         C3 = 0
@@ -107,14 +119,14 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
             f = - w_s + self.B\
                    - 2 * (A1 * w_s**2 + B1 * w_s) / (D1 + math.sqrt(D1**2 + 4 * C1 * (A1 * w_s**2 + B1 * w_s)))\
                    - 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
-                   #- 2 * (B3 * w_s) / (D3 + math.sqrt(D3**2 + 4 * C3 * B2 * w_s))
+                   #- 2 * (B3 * w_s) / (D3 + math.sqrt(D3**2 + 4 * C3 * B2 * w_s)) # for [N]
             return f
         
         w_s_root = fsolve(func_s, self.B)
         w_s = w_s_root[0]
         tol = 1e-12
         if abs(func_s(w_s)) > tol:
-            print("Error: f > 0, f =",str(w_s_root[1]))
+            print("Error: f >",tol,"f =",str(func_s(w_s)))
             sys.exit()
         w_Os = 2 * (A1 * w_s**2 + B1 * w_s) / (D1 + math.sqrt(D1**2 + 4 * C1 * (A1 * w_s**2 + B1 * w_s)))
         w_Oss = 2 * (A2 * w_s**2 + B2 * w_s) / (D2 + math.sqrt(D2**2 + 4 * C2 * (A2 * w_s**2 + B2 * w_s)))
@@ -128,7 +140,7 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param Tw: surface temperature [K]
         :return: f_CO = d[CO]/dt flux of CO product to the surface [mol/m2/s]
         """
-        f_CO = k["kO3"] * self.w_O * w_Os + k["kO7"] * self.w_O * w_Oss
+        f_CO = k["kO3"] * self.w_O * w_Os + k["kO7"] * self.w_O * w_Oss + k["kox2"] * self.w_O2 * w_Os + k["kox5"] * self.w_O2 * w_Oss
         return f_CO
     
     def fun_f_O(self, Tw, t, k, w_s, w_Os, w_Oss):
@@ -138,8 +150,10 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param Tw: surface temperature [K]
         :return: f_O = d[O]/dt flux of O product to the surface [mol/m2/s]
         """
-        press_O = self.p_beam # O-atom pressure [Pa] assume x_O = 1
-        f_O = press_O/(self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * self.T_beam)) - k["kO1"] * self.w_O * w_s + k["kO2"] * w_Os - k["kO4"] * self.w_O * w_Os - k["kO5"] * self.w_O * w_s + k["kO6"] * w_Oss + 0
+        press_O = self.x_in["O"] * self.p_beam # O-atom pressure [Pa]
+        f_O = press_O / (self.Av * math.sqrt(2 * math.pi * self.m_O * self.k_B * self.T_beam)) \
+            - k["kO1"] * self.w_O * w_s + k["kO2"] * w_Os - k["kO4"] * self.w_O * w_Os - k["kO5"] * self.w_O * w_s + k["kO6"] * w_Oss \
+            + k["kox3"] * self.w_O2 * w_Os
         return f_O
     
     def fun_f_O2(self, Tw, t, k, w_s, w_Os, w_Oss):
@@ -149,7 +163,11 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param Tw: surface temperature [K]
         :return: f_O2 = d[O2]/dt flux of O2 product to the surface [mol/m2/s]
         """
-        f_O2 = 0 + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 + 0
+        press_O2 = self.x_in["O2"] * self.p_beam # O-atom pressure [Pa]
+        f_O2 = press_O2 / (self.Av * math.sqrt(2 * math.pi * self.m_O2 * self.k_B * self.T_beam)) \
+            + k["kO8"] * w_Oss**2 + k["kO9"] * w_Os**2 \
+            - k["kox1"] * self.w_O2 * w_s**2 - k["kox3"] * self.w_O2 * w_Os - k["kox4"] * self.w_O2 * w_s**2
+        
         return f_O2
     
     def fun_f_CO2(self, Tw, t, k, w_s, w_Os, w_Oss):
@@ -159,7 +177,8 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         :param Tw: surface temperature [K]
         :return: f_CO2 = d[CO2]/dt flux of CO2 product to the surface [mol/m2/s]
         """
-        f_CO2 = k["kO4"] * self.w_O * w_Os 
+        f_CO2 = k["kO4"] * self.w_O * w_Os + k["kox3"] * self.w_O2 * w_Os 
+
         return f_CO2
     
     def solve_ODEs(self, Tw):
@@ -185,17 +204,57 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         sol_CO2 = odeint(self.fun_f_CO2, Tw, t_eval, args=(k,w_s,w_Os,w_Oss))
         f_CO2=sol_CO2[1]-sol_CO2[0]
 
-        # probabilities
-        p_CO = f_CO / self.f_Oin
-        p_O = f_O / self.f_Oin
-        p_O2 = 2 * f_O2 / self.f_Oin # if x_O2 > 0: (2 * f_CO2 + f_CO) / (2 * self.f_O2in)
-        p_CO2 = 2 * f_CO2 / self.f_Oin
+        f={"CO":f_CO,"O":f_O,"O2":f_O2,"CO2":f_CO2}
 
-        return p_CO, p_O, p_O2, p_CO2
+        # probabilities
+        if self.x_in["O"] == 1:
+            p_CO = f_CO / self.f_Oin
+            p_O = f_O / self.f_Oin
+            p_O2 = 2 * f_O2 / self.f_Oin
+            p_CO2 = 2 * f_CO2 / self.f_Oin
+        elif self.x_in["O2"] == 1: # not sure about these probabilities
+            p_CO = f_CO / (0.5 * self.f_O2in)
+            p_O = f_O / (0.5 * self.f_O2in)
+            p_O2 = f_O2 / self.f_O2in # in the paper: (2 * f_CO2 + f_CO) / self.f_O2in
+            p_CO2 = f_CO2 / self.f_O2in
+        else:
+            print("Error: x_in[\"O\"] or x_in[\"O2\"] must equal to 1")
+            sys.exit()
+
+        p={"CO":p_CO,"O":p_O,"O2":p_O2,"CO2":p_CO2}
+
+        return p,f
     
+    def plot_reaction_rates(self):
+        """
+        plot the model reaction rates
+        """ 
+        Tw = np.linspace(800,2400,100)
+        f_CO = []
+        f_O = []
+        f_O2 = []
+        f_CO2 = []
+        for Tw_i in Tw:
+            p_i, f_i  = self.solve_ODEs(Tw_i)
+            f_CO.append(f_i["CO"])
+            f_O.append(f_i["O"])
+            f_O2.append(f_i["O2"])
+            f_CO2.append(f_i["CO2"])
+
+        plt.plot(Tw, np.array(f_CO)*self.Mm_CO, 'k', label='CO')
+        plt.plot(Tw, np.array(f_CO2)*self.Mm_CO2, 'r', label='CO2')
+        plt.plot(Tw, np.array(f_O2)*self.Mm_O2, 'g', label='O2')
+        plt.plot(Tw, np.array(f_O)*self.Mm_O, 'b', label='O')
+        plt.legend(loc='best')
+        plt.xlabel('T [K]')
+        plt.ylabel('RR [kg/m2/s]')
+        plt.xlim(800,2400)
+        plt.grid()
+        plt.show()     
+
     def plot_model_prediction(self):
         """
-        plot the model prediction for O-atom
+        plot the model prediction (probability)
         """ 
         Tw = np.linspace(800,2400,100)
         p_CO = []
@@ -203,22 +262,22 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         p_O2 = []
         p_CO2 = []
         for Tw_i in Tw:
-            p_CO_i, p_O_i, p_O2_i, p_CO2_i  = self.solve_ODEs(Tw_i)
-            p_CO.append(p_CO_i)
-            p_O.append(p_O_i)
-            p_O2.append(p_O2_i)
-            p_CO2.append(p_CO2_i)
+            p_i, f_i  = self.solve_ODEs(Tw_i)
+            p_CO.append(p_i["CO"])
+            p_O.append(p_i["O"])
+            p_O2.append(p_i["O2"])
+            p_CO2.append(p_i["CO2"])
 
         p_CO_Prata = np.loadtxt("data/CO_probability.dat", delimiter=',')
         p_CO2_Prata = np.loadtxt("data/CO2_probability.dat", delimiter=',')
         p_O2_Prata = np.loadtxt("data/O2_probability.dat", delimiter=',')
         p_O_Prata = np.loadtxt("data/O_probability.dat", delimiter=',')
 
-        plt.plot(p_CO_Prata[:,0], p_CO_Prata[:,1], 'k*', label='CO Prata')
-        plt.plot(p_CO2_Prata[:,0], p_CO2_Prata[:,1], 'r*', label='CO2 Prata')
-        plt.plot(p_O2_Prata[:,0], p_O2_Prata[:,1], 'g*', label='O2 Prata')
-        plt.plot(p_O_Prata[:,0], p_O_Prata[:,1], 'b*', label='O Prata')
-
+        if self.x_in["O"] == 1:
+            plt.plot(p_CO_Prata[:,0], p_CO_Prata[:,1], 'k*', label='CO Prata')
+            plt.plot(p_CO2_Prata[:,0], p_CO2_Prata[:,1], 'r*', label='CO2 Prata')
+            plt.plot(p_O2_Prata[:,0], p_O2_Prata[:,1], 'g*', label='O2 Prata')
+            plt.plot(p_O_Prata[:,0], p_O_Prata[:,1], 'b*', label='O Prata')
 
         plt.plot(Tw, np.array(p_CO), 'k', label='CO')
         plt.plot(Tw, np.array(p_CO2), 'r', label='CO2')
@@ -229,8 +288,6 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.xlim(800,2400)
         plt.ylim(-0.1,1)
         plt.grid()
-        home_dir=os.getenv("HOME")
-        plt.savefig(home_dir+'/Desktop/fig1.png', transparent=True)
         plt.show()     
 
     def plot_surface_coverage(self):
@@ -255,18 +312,21 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         s_coverage_Prata =  np.loadtxt("data/s_coverage.dat",delimiter=',')
         total_O_coverage_Prata =  np.loadtxt("data/total_O_coverage.dat",delimiter=',')
 
-
         plt.plot(Tw, np.array(w_Os)/self.B, 'r', label='w_Os')
-        plt.plot(O_coverage_Prata[:,0], O_coverage_Prata[:,1], 'r*', label='w_Os Prata')
+        if self.x_in["O"] == 1:
+            plt.plot(O_coverage_Prata[:,0], O_coverage_Prata[:,1], 'r*', label='w_Os Prata')
 
         plt.plot(Tw, np.array(w_Oss)/self.B, 'b', label='w_Oss')
-        plt.plot(O_star_coverage_Prata[:, 0], O_star_coverage_Prata[:, 1], 'b*', label='w_Oss Prata')
+        if self.x_in["O"] == 1:
+            plt.plot(O_star_coverage_Prata[:, 0], O_star_coverage_Prata[:, 1], 'b*', label='w_Oss Prata')
 
         plt.plot(Tw, np.array(w_s)/self.B, 'k', label='w_s')
-        plt.plot(s_coverage_Prata[:, 0], s_coverage_Prata[:, 1], 'k*', label='w_s Prata')
+        if self.x_in["O"] == 1:
+            plt.plot(s_coverage_Prata[:, 0], s_coverage_Prata[:, 1], 'k*', label='w_s Prata')
 
         plt.plot(Tw, (np.array(w_Os)+np.array(w_Oss))/self.B, 'g', label='w_Os+w_Oss')
-        plt.plot(total_O_coverage_Prata[:, 0], total_O_coverage_Prata[:, 1], 'g*', label='w_Os+w_Oss Prata')
+        if self.x_in["O"] == 1:
+            plt.plot(total_O_coverage_Prata[:, 0], total_O_coverage_Prata[:, 1], 'g*', label='w_Os+w_Oss Prata')
 
         plt.legend(loc='best')
         plt.xlabel('T [K]')
@@ -274,8 +334,6 @@ class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
         plt.yscale("log")
         plt.xlim(800,2000)
         plt.ylim(1e-4,1)
-        home_dir=os.getenv("HOME")
-        plt.savefig(home_dir+'/Desktop/fig2.png', transparent=True)
         plt.show()
 
 
