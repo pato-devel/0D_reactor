@@ -17,15 +17,14 @@ import sys, os
 class PrataOxidationModel(Ox.OxidationRateModelSelector, ABC):
     """Oxidation class using Prata model
 
-    Compute and plot the propability of products for O-atom
-    Plot surface coverage for O-atom
+    Compute and plot reaction rates, propability of products, surface coverage for O-atom or O2
 
     Attributes:
         None
     """
 
     # constant values
-    x_in = {"O":1,"O2":0} # mole fraction of inflow gas [-]
+    x_in = {"O":0,"O2":1} # mole fraction of inflow gas: x_O or x_O2 [-]
     if not ((x_in["O"] == 1 and x_in["O2"] == 0) or (x_in["O"] == 0 and x_in["O2"] == 1)):
         print("Error: x_in[\"O\"] or x_in[\"O2\"] must equal to 1")
         print("x_in =", x_in)
